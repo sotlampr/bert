@@ -133,5 +133,23 @@ class TokenizationTest(tf.test.TestCase):
     self.assertFalse(tokenization._is_punctuation(u" "))
 
 
+  def test_tokenize_merged_character(self):
+    vocab_tokens = ["[UNK]", "finish", "line"]
+    with tempfile.NamedTemporaryFile(delete=False) as vocab_writer:
+      if six.PY2:
+        vocab_writer.write("".join([x + "\n" for x in vocab_tokens]))
+      else:
+        vocab_writer.write("".join(
+            [x + "\n" for x in vocab_tokens]).encode("utf-8"))
+      vocab_file = vocab_writer.name
+
+    tokenizer = tokenization.FullTokenizer(vocab_file)
+    self.assertAllEqual(
+        tokenizer.tokenize(u"finish line♡"),
+        ["finish", "line", "[UNK]"])
+
+
+
+
 if __name__ == "__main__":
   tf.test.main()
